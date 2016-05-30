@@ -2,6 +2,7 @@
 # Code by Michael Horne
 # Some code based on code written by Pimoroni - https://github.com/pimoroni/Piano-HAT
 
+from __future__ import division
 from gpiozero import Button, MCP3008, LED
 import glob
 import os
@@ -12,12 +13,6 @@ import fluidsynth
 # Start up the Synth and load the sound font
 fs = fluidsynth.Synth()
 fs.start(driver='alsa')
-sfid = fs.sfload("soundfonts/JR_church.SF2")
-fs.program_select(0, sfid, 0, 0)
-
-# Set some globals
-note_multiplier = 1
-volume = 60
 
 # Set-up buttons for reset and shutdown
 button_reset = Button(23)
@@ -99,8 +94,8 @@ def reset():
 
 def startup():
 	print("RASPBERRY PI MUSIC BOX")
-	fs.noteon(0, 60, 60)
-	fs.noteon(0, 50, 60)
+	fs.noteon(0, 60, 100)
+	fs.noteon(0, 50, 100)
 	time.sleep(0.5)
 	fs.noteoff(0, 60)
 	fs.noteoff(0, 50)
@@ -113,47 +108,130 @@ middle_finger_note = 62
 ring_finger_note = 64
 pinky_finger_note = 66
 
+last_note_thumb_top = thumb_top_note
 def thumb_top_start():
-	fs.noteon(0, thumb_top_note, volume)
+	global last_note_thumb_top
+	last_note_thumb_top = thumb_top_note+note_additor
+	fs.noteon(0, last_note_thumb_top, volume)
 
 def thumb_top_stop():
-	fs.noteoff(0, thumb_top_note)
+	global last_note_thumb_top
+	fs.noteoff(0, last_note_thumb_top)
 
+last_note_thumb_right = thumb_right_note
 def thumb_right_start():
-	fs.noteon(0, thumb_right_note, volume)
+	global last_note_thumb_right
+	last_note_thumb_right = thumb_right_note+note_additor
+	fs.noteon(0, last_note_thumb_right, volume)
 
 def thumb_right_stop():
-	fs.noteoff(0, thumb_right_note)
+	global last_note_thumb_right
+	fs.noteoff(0, last_note_thumb_right)
 
+last_note_thumb_bottom = thumb_bottom_note
 def thumb_bottom_start():
-	fs.noteon(0, thumb_bottom_note, volume)
+	global last_note_thumb_bottom
+	last_note_thumb_bottom = thumb_bottom_note+note_additor
+	fs.noteon(0, last_note_thumb_bottom, volume)
 
 def thumb_bottom_stop():
-	fs.noteoff(0, thumb_bottom_note)
+	global last_note_thumb_bottom
+	fs.noteoff(0, last_note_thumb_bottom)
 
+last_note_index_finger = index_finger_note
 def index_finger_start():
-	fs.noteon(0, index_finger_note, volume)
+	global last_note_index_finger
+	last_note_index_finger = index_finger_note+note_additor
+	fs.noteon(0, last_note_index_finger, volume)
 
 def index_finger_stop():
-	fs.noteoff(0, index_finger_note)
+	global last_note_index_finger
+	fs.noteoff(0, last_note_index_finger)
 
+last_note_middle_finger = middle_finger_note
 def middle_finger_start():
-	fs.noteon(0, middle_finger_note, volume)
+	global last_note_middle_finger
+	last_note_middle_finger = middle_finger_note+note_additor
+	fs.noteon(0, last_note_middle_finger, volume)
 
 def middle_finger_stop():
-	fs.noteoff(0, middle_finger_note)
+	global last_note_middle_finger
+	fs.noteoff(0, last_note_middle_finger)
 
+last_note_ring_finger = ring_finger_note
 def ring_finger_start():
-	fs.noteon(0, ring_finger_note, volume)
+	global last_note_ring_finger
+	last_note_ring_finger = ring_finger_note+note_additor
+	fs.noteon(0, last_note_ring_finger, volume)
 
 def ring_finger_stop():
-	fs.noteoff(0, ring_finger_note)
+	global last_note_ring_finger
+	fs.noteoff(0, last_note_ring_finger)
 
+last_note_pinky_finger = pinky_finger_note
 def pinky_finger_start():
-	fs.noteon(0, pinky_finger_note, volume)
+	global last_note_pinky_finger
+	last_note_pinky_finger = pinky_finger_note+note_additor
+	fs.noteon(0, last_note_pinky_finger, volume)
 
 def pinky_finger_stop():
-	fs.noteoff(0, pinky_finger_note)
+	global last_note_pinky_finger
+	fs.noteoff(0, last_note_pinky_finger)
+
+fonts = []
+def load_soundfonts():
+	global fonts
+
+	BANK = os.path.join(os.path.dirname(__file__), "soundfonts")
+	FILETYPES = ['*.SF2', '*.sf2']
+	all_files = glob.glob(os.path.join(BANK, "*"))
+	print ("{} soundfonts have been found".format(len(all_files)))
+
+	fonts = [fs.sfload(file) for file in all_files]
+
+volume = 0
+def set_volume():
+	global volume
+	new_volume = int(pot0.raw_value / 10)
+	if new_volume != volume:
+		volume = new_volume
+		print("Volume set to {}".format(volume))
+
+# Trigger loading of the sound fonts
+load_soundfonts()
+
+instrument = 0
+def set_instrument():
+	global instrument
+	number_of_instruments = len(fonts)-1
+	number_of_pot_steps = 1024
+	current_pot_value = pot1.raw_value
+
+	new_instrument = int(round(number_of_instruments*(current_pot_value / number_of_pot_steps)))
+	#print("Number of instruments: {} / Current pot: {} / New instrument: {} / Number of pot steps: {}".format(number_of_instruments, current_pot_value, new_instrument, number_of_pot_steps))
+
+	if new_instrument != instrument:
+		print("Instrument being set to {}".format(new_instrument))
+		instrument = new_instrument
+		fs.program_select(0, fonts[instrument], 0, 0)
+
+note_additor = 0
+def set_note_additor():
+	global note_additor
+	max_additor = 34
+	number_of_pot_steps = 1024
+	current_pot_value = pot2.raw_value
+
+	new_additor = int(round(max_additor*(current_pot_value / number_of_pot_steps)))
+
+	if new_additor != note_additor:
+		print("Additor being set to {}".format(new_additor))
+		note_additor = new_additor
+
+# Select the first sound font
+set_volume()
+set_instrument()
+set_note_additor()
 
 # Play a tone so we know that we've started
 startup()
@@ -186,7 +264,9 @@ print("Starting main loop")
 
 # Main loop
 while not stop_main_loop:
-	pass
+	set_volume()
+	set_instrument()
+	set_note_additor()
 
 main_loop_stopped = 1
 while True:
