@@ -3,40 +3,21 @@
 # Some code based on code written by Pimoroni - https://github.com/pimoroni/Piano-HAT
 
 from gpiozero import Button, MCP3008, LED
-import pygame
-import signal
 import glob
 import os
 import re
 import time
+import fluidsynth
 
-# Set-up sounds for import
-BANK = os.path.join(os.path.dirname(__file__), "sounds")
-FILETYPES = ['*.wav', '*.ogg']
-samples = []
-files = []
-octave = 0
-octaves = 0
+# Start up the Synth and load the sound font
+fs = fluidsynth.Synth()
+fs.start(driver='alsa')
+sfid = fs.sfload("soundfonts/JR_church.SF2")
+fs.program_select(0, sfid, 0, 0)
 
-pygame.mixer.pre_init(44100, -16, 1, 512)
-pygame.mixer.init()
-
-# Start-up music
-play_startup = 1
-if play_startup:
-	pygame.mixer.music.load("startup.mp3")
-	pygame.mixer.music.play()
-	time.sleep(3)
-
-pygame.mixer.set_num_channels(32)
-
-# Search for patch (wav/ogg) files
-patches = glob.glob(os.path.join(BANK, '*'))
-patch_index = 0
-
-# Error if nothing found
-if len(patches) == 0:
-    exit("Couldn't find any .wav files in: {}".format(BANK))
+# Set some globals
+note_multiplier = 1
+volume = 60
 
 # Set-up buttons for reset and shutdown
 button_reset = Button(23)
@@ -68,30 +49,9 @@ pot2 = MCP3008(channel=0)
 led_purple = LED(24)
 led_purple.on()
 
-def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
-    return [int(text) if text.isdigit() else text.lower() for text in re.split(_nsre, s)]
-
-def load_samples(patch):
-    global samples, files, octaves, octave
-    files = []
-    print('Loading Samples from: {}'.format(patch))
-    for filetype in FILETYPES:
-        files.extend(glob.glob(os.path.join(patch, filetype)))
-    files.sort(key=natural_sort_key)
-    octaves = len(files) / 12
-    samples = [pygame.mixer.Sound(sample) for sample in files]
-    octave = int(octaves / 2)
-
 def play_note(note):
-    global samples
-    samples[note].play(loops=0)
-
-def handle_instrument(channel, pressed):
-    global patch_index
-    patch_index += 1
-    patch_index %= len(patches)
-    print('Selecting Patch: {}'.format(patches[patch_index]))
-    load_samples(patches[patch_index])
+	global fs
+	fs.noteon(0, note, 60)
 
 def octave_up():
     global octave
@@ -137,14 +97,66 @@ def reset():
 	os.system("sudo reboot")
 	exit("Rebooting")
 
-#pianohat.on_note(handle_note)
-# Load the piano samples
-load_samples(patches[1])
+def startup():
+	print("RASPBERRY PI MUSIC BOX")
+	fs.noteon(0, 60, 60)
+	fs.noteon(0, 50, 60)
+	time.sleep(0.5)
+	fs.noteoff(0, 60)
+	fs.noteoff(0, 50)
 
-# Give some diagnostic information
-print("RASPBERRY PI MUSIC BOX")
-print("There are {} octaves".format(octaves))
-print("There are {} samples".format(len(samples)))
+thumb_bottom_note = 54
+thumb_right_note = 56
+thumb_top_note = 58
+index_finger_note = 60
+middle_finger_note = 62
+ring_finger_note = 64
+pinky_finger_note = 66
+
+def thumb_top_start():
+	fs.noteon(0, thumb_top_note, volume)
+
+def thumb_top_stop():
+	fs.noteoff(0, thumb_top_note)
+
+def thumb_right_start():
+	fs.noteon(0, thumb_right_note, volume)
+
+def thumb_right_stop():
+	fs.noteoff(0, thumb_right_note)
+
+def thumb_bottom_start():
+	fs.noteon(0, thumb_bottom_note, volume)
+
+def thumb_bottom_stop():
+	fs.noteoff(0, thumb_bottom_note)
+
+def index_finger_start():
+	fs.noteon(0, index_finger_note, volume)
+
+def index_finger_stop():
+	fs.noteoff(0, index_finger_note)
+
+def middle_finger_start():
+	fs.noteon(0, middle_finger_note, volume)
+
+def middle_finger_stop():
+	fs.noteoff(0, middle_finger_note)
+
+def ring_finger_start():
+	fs.noteon(0, ring_finger_note, volume)
+
+def ring_finger_stop():
+	fs.noteoff(0, ring_finger_note)
+
+def pinky_finger_start():
+	fs.noteon(0, pinky_finger_note, volume)
+
+def pinky_finger_stop():
+	fs.noteoff(0, pinky_finger_note)
+
+# Play a tone so we know that we've started
+startup()
 
 # Set-up main loop watchers
 main_loop_stopped = 0
@@ -154,45 +166,27 @@ print("Initialising rear buttons")
 button_reset.when_pressed = reset
 button_shutdown.when_pressed = shutdown
 
-note_multiplier = 4
-
-def trigger_note(finger, note_value):
-	global note_multiplier
-
-	while finger.is_pressed:
-		play_note(note_value * note_multiplier)
-
-def play_index_finger():
-	global index_finger
-	trigger_note(index_finger, 2)
-
-def play_middle_finger():
-	global middle_finger
-	trigger_note(middle_finger, 4)
-
-def play_ring_finger():
-	global ring_finger
-	trigger_note(ring_finger, 6)
-
-def play_pinky_finger():
-	global pinky_finger
-	trigger_note(pinky_finger, 8)
-
-index_finger.when_pressed = play_index_finger
-middle_finger.when_pressed = play_middle_finger
-ring_finger.when_pressed = play_ring_finger
-pinky_finger.when_pressed = play_pinky_finger
+# Assign actions to when_pressed for each button
+thumb_bottom.when_pressed = thumb_bottom_start
+thumb_bottom.when_released = thumb_bottom_stop
+thumb_right.when_pressed = thumb_right_start
+thumb_right.when_released = thumb_right_stop
+thumb_top.when_pressed = thumb_top_start
+thumb_top.when_released = thumb_top_stop
+index_finger.when_pressed = index_finger_start
+index_finger.when_released = index_finger_stop
+middle_finger.when_pressed = middle_finger_start
+middle_finger.when_released = middle_finger_stop
+ring_finger.when_pressed = ring_finger_start
+ring_finger.when_released = ring_finger_stop
+pinky_finger.when_pressed = pinky_finger_start
+pinky_finger.when_released = pinky_finger_stop
 
 print("Starting main loop")
+
 # Main loop
 while not stop_main_loop:
 	pass
-	#print("Pot 0: {} / Pot 1: {} / Pot 2: {}".format(pot0.value, pot1.value, pot2.value))	
-	#time.sleep(0.5)
-
-	#for chan in [0,1,2,3,4,5,6,7,8]:
-	#	play_note(chan)
-	#	time.sleep(0.4)
 
 main_loop_stopped = 1
 while True:
