@@ -45,7 +45,6 @@ led_purple = LED(24)
 led_purple.on()
 
 def play_note(note):
-	global fs
 	fs.noteon(0, note, 60)
 
 def octave_up():
@@ -61,7 +60,7 @@ def octave_down():
         print('Selected Octave: {}'.format(octave))
 
 def shutdown():
-	global main_loop_stopped, stop_main_loop
+	global stop_main_loop
 
 	print("Shutdown requested")
 
@@ -77,7 +76,7 @@ def shutdown():
 	exit("Shutdown")
 
 def reset():
-	global main_loop_stopped, stop_main_loop
+	global stop_main_loop
 
 	print("Reset requested")
 
@@ -115,7 +114,6 @@ def thumb_top_start():
 	fs.noteon(0, last_note_thumb_top, volume)
 
 def thumb_top_stop():
-	global last_note_thumb_top
 	fs.noteoff(0, last_note_thumb_top)
 
 last_note_thumb_right = thumb_right_note
@@ -125,7 +123,6 @@ def thumb_right_start():
 	fs.noteon(0, last_note_thumb_right, volume)
 
 def thumb_right_stop():
-	global last_note_thumb_right
 	fs.noteoff(0, last_note_thumb_right)
 
 last_note_thumb_bottom = thumb_bottom_note
@@ -135,7 +132,6 @@ def thumb_bottom_start():
 	fs.noteon(0, last_note_thumb_bottom, volume)
 
 def thumb_bottom_stop():
-	global last_note_thumb_bottom
 	fs.noteoff(0, last_note_thumb_bottom)
 
 last_note_index_finger = index_finger_note
@@ -145,7 +141,6 @@ def index_finger_start():
 	fs.noteon(0, last_note_index_finger, volume)
 
 def index_finger_stop():
-	global last_note_index_finger
 	fs.noteoff(0, last_note_index_finger)
 
 last_note_middle_finger = middle_finger_note
@@ -155,7 +150,6 @@ def middle_finger_start():
 	fs.noteon(0, last_note_middle_finger, volume)
 
 def middle_finger_stop():
-	global last_note_middle_finger
 	fs.noteoff(0, last_note_middle_finger)
 
 last_note_ring_finger = ring_finger_note
@@ -165,7 +159,6 @@ def ring_finger_start():
 	fs.noteon(0, last_note_ring_finger, volume)
 
 def ring_finger_stop():
-	global last_note_ring_finger
 	fs.noteoff(0, last_note_ring_finger)
 
 last_note_pinky_finger = pinky_finger_note
@@ -175,7 +168,6 @@ def pinky_finger_start():
 	fs.noteon(0, last_note_pinky_finger, volume)
 
 def pinky_finger_stop():
-	global last_note_pinky_finger
 	fs.noteoff(0, last_note_pinky_finger)
 
 fonts = []
