@@ -107,10 +107,14 @@ middle_finger_note = 62
 ring_finger_note = 64
 pinky_finger_note = 66
 
+def current_note_additor():
+	max_additor = 34
+	return int(pot2.value * max_additor)
+
 last_note_thumb_top = thumb_top_note
 def thumb_top_start():
 	global last_note_thumb_top
-	last_note_thumb_top = thumb_top_note+note_additor
+	last_note_thumb_top = thumb_top_note + current_note_additor()
 	fs.noteon(0, last_note_thumb_top, volume)
 
 def thumb_top_stop():
@@ -119,7 +123,7 @@ def thumb_top_stop():
 last_note_thumb_right = thumb_right_note
 def thumb_right_start():
 	global last_note_thumb_right
-	last_note_thumb_right = thumb_right_note+note_additor
+	last_note_thumb_right = thumb_right_note + current_note_additor()
 	fs.noteon(0, last_note_thumb_right, volume)
 
 def thumb_right_stop():
@@ -128,7 +132,7 @@ def thumb_right_stop():
 last_note_thumb_bottom = thumb_bottom_note
 def thumb_bottom_start():
 	global last_note_thumb_bottom
-	last_note_thumb_bottom = thumb_bottom_note+note_additor
+	last_note_thumb_bottom = thumb_bottom_note + current_note_additor()
 	fs.noteon(0, last_note_thumb_bottom, volume)
 
 def thumb_bottom_stop():
@@ -137,7 +141,7 @@ def thumb_bottom_stop():
 last_note_index_finger = index_finger_note
 def index_finger_start():
 	global last_note_index_finger
-	last_note_index_finger = index_finger_note+note_additor
+	last_note_index_finger = index_finger_note + current_note_additor()
 	fs.noteon(0, last_note_index_finger, volume)
 
 def index_finger_stop():
@@ -146,7 +150,7 @@ def index_finger_stop():
 last_note_middle_finger = middle_finger_note
 def middle_finger_start():
 	global last_note_middle_finger
-	last_note_middle_finger = middle_finger_note+note_additor
+	last_note_middle_finger = middle_finger_note + current_note_additor()
 	fs.noteon(0, last_note_middle_finger, volume)
 
 def middle_finger_stop():
@@ -155,7 +159,7 @@ def middle_finger_stop():
 last_note_ring_finger = ring_finger_note
 def ring_finger_start():
 	global last_note_ring_finger
-	last_note_ring_finger = ring_finger_note+note_additor
+	last_note_ring_finger = ring_finger_note + current_note_additor()
 	fs.noteon(0, last_note_ring_finger, volume)
 
 def ring_finger_stop():
@@ -164,7 +168,7 @@ def ring_finger_stop():
 last_note_pinky_finger = pinky_finger_note
 def pinky_finger_start():
 	global last_note_pinky_finger
-	last_note_pinky_finger = pinky_finger_note+note_additor
+	last_note_pinky_finger = pinky_finger_note + current_note_additor()
 	fs.noteon(0, last_note_pinky_finger, volume)
 
 def pinky_finger_stop():
@@ -207,23 +211,9 @@ def set_instrument():
 		instrument = new_instrument
 		fs.program_select(0, fonts[instrument], 0, 0)
 
-note_additor = 0
-def set_note_additor():
-	global note_additor
-	max_additor = 34
-	number_of_pot_steps = 1024
-	current_pot_value = pot2.raw_value
-
-	new_additor = int(round(max_additor*(current_pot_value / number_of_pot_steps)))
-
-	if new_additor != note_additor:
-		print("Additor being set to {}".format(new_additor))
-		note_additor = new_additor
-
 # Select the first sound font
 set_volume()
 set_instrument()
-set_note_additor()
 
 # Play a tone so we know that we've started
 startup()
@@ -258,7 +248,6 @@ print("Starting main loop")
 while not stop_main_loop:
 	set_volume()
 	set_instrument()
-	set_note_additor()
 
 main_loop_stopped = 1
 while True:
