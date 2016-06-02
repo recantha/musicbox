@@ -195,12 +195,10 @@ load_soundfonts()
 instrument = 0
 def set_instrument():
 	global instrument
-	number_of_instruments = len(fonts)-1
-	number_of_pot_steps = 1024
-	current_pot_value = pot1.raw_value
+	max_instrument = len(fonts)-1
 
-	new_instrument = int(round(number_of_instruments*(current_pot_value / number_of_pot_steps)))
-	#print("Number of instruments: {} / Current pot: {} / New instrument: {} / Number of pot steps: {}".format(number_of_instruments, current_pot_value, new_instrument, number_of_pot_steps))
+	new_instrument = int(pot1.value * max_instrument)
+	#print("Max instrument: {} / Current pot: {} / New instrument: {}".format(max_instrument, pot1.value, new_instrument))
 
 	if new_instrument != instrument:
 		print("Instrument being set to {}".format(new_instrument))
