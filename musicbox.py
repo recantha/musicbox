@@ -9,6 +9,7 @@ import os
 import re
 import time
 import fluidsynth
+import signal
 
 # Start up the Synth and load the sound font
 fs = fluidsynth.Synth()
@@ -66,7 +67,7 @@ def shutdown():
 
 	stop_main_loop = 1
 	while not main_loop_stopped:
-		pass
+		time.sleep(0.01)
 
 	print("Shutting down the Pi")
 	for chan in [7,6,5,4,3,2,1]:
@@ -82,7 +83,7 @@ def reset():
 
 	stop_main_loop = 1
 	while not main_loop_stopped:
-		pass
+		time.sleep(0.01)
 
 	print("Resetting the Pi")
 	for chan in [7,6,5,4,3,2,1,2,3,4,5,6,7]:
@@ -261,5 +262,4 @@ while not stop_main_loop:
 	set_note_additor()
 
 main_loop_stopped = 1
-while True:
-	pass
+signal.pause()
