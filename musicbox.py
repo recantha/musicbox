@@ -1,6 +1,8 @@
 # Raspberry Pi Music Box
 # Code by Michael Horne
 # Some code based on code written by Pimoroni - https://github.com/pimoroni/Piano-HAT
+# Happy for anyone to use all or part of this
+# Spring/Summer 2016
 
 from __future__ import division
 from gpiozero import Button, MCP3008, LED
@@ -15,8 +17,8 @@ fs = fluidsynth.Synth()
 fs.start(driver='alsa')
 
 # Set-up buttons for reset and shutdown
-button_reset = Button(23)
-button_shutdown = Button(5)
+button_reset = Button(5)
+button_shutdown = Button(23)
 
 # Set-up buttons for keyboard input
 thumb_bottom = Button(13)
@@ -28,7 +30,7 @@ ring_finger = Button(20)
 pinky_finger = Button(21)
 
 # Test procedure for the keyboard buttons
-test_buttons = 0
+test_buttons = False
 if test_buttons:
 	while True:
 		print("Tbot:{}/Ttop:{}/Trih:{}/Idx:{}/Mid:{}/Rng:{}/Pnk:{}".format(thumb_bottom.value, thumb_top.value, thumb_right.value, index_finger.value, middle_finger.value, ring_finger.value, pinky_finger.value))
@@ -171,15 +173,18 @@ def pinky_finger_stop():
 	fs.noteoff(0, last_note_pinky_finger)
 
 fonts = []
+font_names = []
 def load_soundfonts():
-	global fonts
+	global fonts, font_names
 
 	BANK = os.path.join(os.path.dirname(__file__), "soundfonts")
 	FILETYPES = ['*.SF2', '*.sf2']
 	all_files = glob.glob(os.path.join(BANK, "*"))
 	print ("{} soundfonts have been found".format(len(all_files)))
 
+	font_names = [format(file) for file in all_files]
 	fonts = [fs.sfload(file) for file in all_files]
+	print(font_names[0])
 
 volume = 0
 def set_volume():
@@ -194,7 +199,8 @@ load_soundfonts()
 
 instrument = 0
 def set_instrument():
-	global instrument
+	global instrument, font_names
+
 	number_of_instruments = len(fonts)-1
 	number_of_pot_steps = 1024
 	current_pot_value = pot1.raw_value
@@ -204,6 +210,7 @@ def set_instrument():
 
 	if new_instrument != instrument:
 		print("Instrument being set to {}".format(new_instrument))
+		print("Instrument is {}".format(font_names[new_instrument]))
 		instrument = new_instrument
 		fs.program_select(0, fonts[instrument], 0, 0)
 
