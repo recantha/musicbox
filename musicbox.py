@@ -49,18 +49,6 @@ led_purple.on()
 def play_note(note):
 	fs.noteon(0, note, 60)
 
-def octave_up():
-    global octave
-    if octave < octaves:
-        octave += 1
-        print('Selected Octave: {}'.format(octave))
-
-def octave_down():
-    global octave
-    if octave > 0:
-        octave -= 1
-        print('Selected Octave: {}'.format(octave))
-
 def shutdown():
 	global stop_main_loop
 
