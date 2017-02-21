@@ -166,8 +166,10 @@ def load_soundfonts():
 	global fonts, font_names
 
 	BANK = os.path.join(os.path.dirname(__file__), "soundfonts")
+	all_files = []
 	FILETYPES = ['*.SF2', '*.sf2']
-	all_files = glob.glob(os.path.join(BANK, "*"))
+	for filetype in FILETYPES:
+		all_files += glob.glob(os.path.join(BANK, filetype))
 	print ("{} soundfonts have been found".format(len(all_files)))
 
 	font_names = [format(file) for file in all_files]
